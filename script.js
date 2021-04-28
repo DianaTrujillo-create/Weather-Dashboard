@@ -28,6 +28,15 @@ searchBtn.on("click", function(event) {
         url: QueryURL,
         method: "GET"
     })
-    
+
+    // Render city & information
+    .then(function(response) {
+        var lat = response.city.coord.lat;
+        console.log(lat);
+        var lon = response.city.coord.lon;
+        console.log(lon);
+
+        var uvIndex = "https://api.openweathermap.o"
+    })
     }
 })
