@@ -49,11 +49,28 @@ searchBtn.on("click", function(event) {
             $("uvindex").text(ivI);
 
             if (ivI < 2) {
-                $("uvindex").remove
+                $("uvindex").remove("yellow orange red purple");
+                $("uvindex").addClass("green");
+            }
+            else if(ivI === 3) {
+                $("uvindex").remove("green orange red purple");
+                $("uvindex").addClass("yellow");
             }
 
-
+            else if (ivI === 6 && 7) {
+                $("uvindex").addClass("orange");
+            }
+            else if (ivI > 8 && 10) {
+                $(uvindex).addClass("red"); 
+            }
+            else if (ivI === 11) {
+                $("uvindex").addClass("purple");
+            }
         })
+
+        console.log(response);
+        console.log(uvIndex);
+        
     })
     }
 })
