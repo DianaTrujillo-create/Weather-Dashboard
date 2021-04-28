@@ -36,7 +36,24 @@ searchBtn.on("click", function(event) {
         var lon = response.city.coord.lon;
         console.log(lon);
 
-        var uvIndex = "https://api.openweathermap.o"
+        var uvIndex = "https://api.openweathermap.org/data/2.5/uvi?lat=" + lat + "&lon=" + lon + "&appid=" + weatherAPIKey;
+        $.ajax({
+            url: uvIndex,
+            method: "GET"
+        }).then(function (index) {
+            console.log(index);
+            
+            var ivI = index.value;
+            console.log(ivI);
+            
+            $("uvindex").text(ivI);
+
+            if (ivI < 2) {
+                $("uvindex").remove
+            }
+
+
+        })
     })
     }
 })
