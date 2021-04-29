@@ -1,93 +1,171 @@
 // Weather API 
-var weatherAPIKey = "5bcec118bb17182a71f0f39b818f385b";
+let apiKey = "5bcec118bb17182a71f0f39b818f385b";
+let searchBtn = $(".searchBtn");
+let searchInput = $(".searchInput");
 
-// when you click search button it makes a call to the API
-var storedCity = [];
+// Left column Elements
+let cityNameEl = $(".cityName");
+let currentDateEl = $(".currentDate");
+let weatherIconEl = $(".weatherIcon");
+let searchHistoryEl = $(".historyItems");
 
-searchBtn.on("click", function(event) {
-    event.preventDefault();
+// Right column Elements
+let tempEl = $(".temp");
+let humidityEl = $(".humidity");
+let windSpeedEl = $(".windSpeed");
+let uvIndexEl = $(".uvIndex");
+let cardRow = $(".card-row");
+
+//  Date variable
+var today = new Date();
+let dd = String(today.getDate()).padStart(2, '0');
+let mm = String(today.getMonth() + 1).padStart(2, '0');
+let yyyy = today.getFullYear();
+var today = mm + '/' + dd + '/' + yyyy;
+
+// Adding a local storage for search history
+if (JSON.parse(localStorage.getItem("searchHistory")) === null) {
+    console.log("searchHistory not found")
+}else{
+    console.log("searchHistory loaded into searchHistoryArr");
+    renderSearchHistory();
+}
+
+// Adding OnClick Functions for the Search Button
+searchBtn.on("click", function(e) {
+    e.preventDefault();
     if (searchInput.val() === "") {
         alert("You must enter a city");
         return;
+    }
+    console.log("clicked button")
+    getWeather(searchInput.val());
+});
 
-        var cityName = search.val();
-        console.log(cityName);
+$(document).on("click", ".historyEntry", function() {
+    console.log("clicked history item")
+    let thisElement = $(this);
+    getWeather(thisElement.text());
+})
 
-        localStorage.setItem("city",JSON.stringify(cityName));
+//Creating a for loop for the search history
+function renderSearchHistory(cityName) {
+    searchHistoryEl.empty();
+    let searchHistoryArr = JSON.parse(localStorage.getItem("searchHistory"));
+    for (let i = 0; i < searchHistoryArr.length; i++) {
+        // Putting a newListItem in loop that way the text of the li element changes, so i dont have to create an array in the HTML.
+        let newListItem = $("<li>").attr("class", "historyEntry");
+        newListItem.text(searchHistoryArr[i]);
+        searchHistoryEl.prepend(newListItem);
+    }
+}
 
-        store();
-        function store() {
-            localStorage.getItem("city");
-            storedCity.push(cityName);
-            localStorage.setItem("city",JSON.stringify(storedCity));
-        }
-    var QueryURL = "api.openweathermap.org/data/2.5/forecast?q" + cityName + "&units=imperial&cnt=40&appid=" + weatherAPIKey;
-    console.log(QueryURL);
-
+// Creating Function to get weather data
+function renderWeatherData(cityName, cityTemp, cityHumidity, cityWindSpeed, cityWeatherIcon, uvVal) {
+    cityNameEl.text(cityName)
+    currentDateEl.text(`(${today})`)
+    tempEl.text(`Temperature: ${cityTemp} °F`);
+    humidityEl.text(`Humidity: ${cityHumidity}%`);
+    windSpeedEl.text(`Wind Speed: ${cityWindSpeed} MPH`);
+    uvIndexEl.text(`UV Index: ${uvVal}`);
+    weatherIconEl.attr("src", cityWeatherIcon);
+}
+// Creating Function to get weather data in desired or specefic citywith API
+function getWeather(desiredCity) {
+    let queryUrl = `https://api.openweathermap.org/data/2.5/weather?q=${desiredCity}&APPID=${apiKey}&units=imperial`;
     $.ajax({
-        url: QueryURL,
+        url: queryUrl,
         method: "GET"
     })
+    .then(function(weatherData) {
+        let cityObj = {
+            cityName: weatherData.name,
+            cityTemp: weatherData.main.temp,
+            cityHumidity: weatherData.main.humidity,
+            cityWindSpeed: weatherData.wind.speed,
+            cityUVIndex: weatherData.coord,
+            cityWeatherIconName: weatherData.weather[0].icon
+        }
+    let queryUrl = `https://api.openweathermap.org/data/2.5/uvi?lat=${cityObj.cityUVIndex.lat}&lon=${cityObj.cityUVIndex.lon}&APPID=${apiKey}&units=imperial`
+    $.ajax({
+        url: queryUrl,
+        method: 'GET'
+    })
+    .then(function(uvData) {
+        if (JSON.parse(localStorage.getItem("searchHistory")) == null) {
+            let searchHistoryArr = [];
+            // Using if and else to prevent the user from adding a city more then once ot the searchHistory
+            if (searchHistoryArr.indexOf(cityObj.cityName) === -1) {
+                searchHistoryArr.push(cityObj.cityName);
+                // store our array of searches and save in local storage
+                localStorage.setItem("searchHistory", JSON.stringify(searchHistoryArr));
+                let renderedWeatherIcon = `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
+                renderWeatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, renderedWeatherIcon, uvData.value);
+                renderSearchHistory(cityObj.cityName);
+            }else{
+                console.log("City already in searchHistory. Not adding to history list")
+                let renderedWeatherIcon = `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
+                renderWeatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, renderedWeatherIcon, uvData.value);
+            }
+ 
+        }else{
+            let searchHistoryArr = JSON.parse(localStorage.getItem("searchHistory"));
+            // Using if and else to prevent the user from adding a city more then once ot the searchHistory
+            if (searchHistoryArr.indexOf(cityObj.cityName) === -1) {
+                searchHistoryArr.push(cityObj.cityName);
+                // store our array of searches and save in local storage
+                localStorage.setItem("searchHistory", JSON.stringify(searchHistoryArr));
+                let renderedWeatherIcon = `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
+                renderWeatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, renderedWeatherIcon, uvData.value);
+                renderSearchHistory(cityObj.cityName);
+            }else{
+                console.log("City already in searchHistory. Not adding to history list")
+                let renderedWeatherIcon = `https:///openweathermap.org/img/w/${cityObj.cityWeatherIconName}.png`;
+                renderWeatherData(cityObj.cityName, cityObj.cityTemp, cityObj.cityHumidity, cityObj.cityWindSpeed, renderedWeatherIcon, uvData.value);
+            }
+        }
+    })
 
-    // Render city & information
-    .then(function(response) {
-        var lat = response.city.coord.lat;
-        console.log(lat);
-        var lon = response.city.coord.lon;
-        console.log(lon);
+    });
 
-        var uvIndex = "https://api.openweathermap.org/data/2.5/uvi?lat=" + lat + "&lon=" + lon + "&appid=" + weatherAPIKey;
+// Function and For loop to get the 5 day forcast      
+    getFiveDayForecast();
+
+    function getFiveDayForecast() {
+        cardRow.empty();
+        let queryUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${desiredCity}&APPID=${apiKey}&units=imperial`;
         $.ajax({
-            url: uvIndex,
+            url: queryUrl,
             method: "GET"
-        }).then(function (index) {
-            console.log(index);
-            
-            var ivI = index.value;
-            console.log(ivI);
-            
-            $("uvindex").text(ivI);
-
-            if (ivI < 2) {
-                $("uvindex").remove("yellow orange red purple");
-                $("uvindex").addClass("green");
-            }
-            else if(ivI === 3) {
-                $("uvindex").remove("green orange red purple");
-                $("uvindex").addClass("yellow");
-            }
-
-            else if (ivI === 6 && 7) {
-                $("uvindex").addClass("orange");
-            }
-            else if (ivI > 8 && 10) {
-                $(uvindex).addClass("red"); 
-            }
-            else if (ivI === 11) {
-                $("uvindex").addClass("purple");
+        })
+        .then(function(fiveDayReponse) {
+            for (let i = 0; i != fiveDayReponse.list.length; i+=8 ) {
+                let cityObj = {
+                    date: fiveDayReponse.list[i].dt_txt,
+                    icon: fiveDayReponse.list[i].weather[0].icon,
+                    temp: fiveDayReponse.list[i].main.temp,
+                    humidity: fiveDayReponse.list[i].main.humidity
+                }
+                let dateStr = cityObj.date;
+                let trimmedDate = dateStr.substring(0, 10); 
+                let weatherIco = `https:///openweathermap.org/img/w/${cityObj.icon}.png`;
+                createForecastCard(trimmedDate, weatherIco, cityObj.temp, cityObj.humidity);
             }
         })
+    }   
+}
+//make it create elements later inside the HTML for the 5 day 
+function createForecastCard(date, icon, temp, humidity) {
 
-        console.log(response);
-        console.log(uvIndex);
+    let fiveDayCardEl = $("<div>").attr("class", "five-day-card");
+    let cardDate = $("<h3>").attr("class", "card-text");
+    let cardIcon = $("<img>").attr("class", "weatherIcon");
+    let cardTemp = $("<p>").attr("class", "card-text");
+    let cardHumidity = $("<p>").attr("class", "card-text");
 
-        var cityList = response.city.name;
-        console.log(cityList);
-        var date = response.list[0].dt_txt;
-        
-        function renderCity() {
-            // creating list 
-
-            var 1 = $("<li>");
-            1.addClass("list-group-item");
-            1.text(cityList);
-            $("searchList").append(1);
-
-            // show container with city info
-
-
-        }
-
-    })
-    }
-})
+    cardRow.append(fiveDayCardEl);
+    cardDate.text(date);
+    cardIcon.attr("src", icon);
+    cardTemp.text(`Temp: ${temp} °F`);
+    cardHumidity.text(`Humidity: ${humidity}%`);
+    fiveDayCardEl.append(cardDate, cardIcon, cardTemp, cardHumidity)};
