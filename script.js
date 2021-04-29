@@ -70,7 +70,24 @@ searchBtn.on("click", function(event) {
 
         console.log(response);
         console.log(uvIndex);
+
+        var cityList = response.city.name;
+        console.log(cityList);
+        var date = response.list[0].dt_txt;
         
+        function renderCity() {
+            // creating list 
+
+            var 1 = $("<li>");
+            1.addClass("list-group-item");
+            1.text(cityList);
+            $("searchList").append(1);
+
+            // show container with city info
+
+
+        }
+
     })
     }
 })
