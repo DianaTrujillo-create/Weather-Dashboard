@@ -3,4 +3,4 @@ Weather application intended to get show a 5 day forcast for the city searched. 
     -Help from a classmate
     -Youtube 
 
-screensh
+screenshot: ![Weather Dashboard](/css/img/weather.png)
